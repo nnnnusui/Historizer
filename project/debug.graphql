@@ -1,0 +1,5 @@
+# run with `JS GraphQL`: https://jimkyndemeyer.github.io/js-graphql-intellij-plugin/
+
+query ScratchQuery {
+    users { id name }
+}

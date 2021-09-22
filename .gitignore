@@ -1,0 +1,10 @@
+.bsp/
+.idea/*
+!.idea/codeStyles/
+!.idea/runConfigurations/
+!.idea/misc.xml
+out/
+
+target/
+project/boot/
+project/plugins/project/
