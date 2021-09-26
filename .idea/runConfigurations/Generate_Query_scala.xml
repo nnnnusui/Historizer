@@ -1,11 +1,11 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Generate GetUserServiceQuery.scala" type="SbtRunConfiguration" factoryName="sbt Task" show_console_on_std_err="false" show_console_on_std_out="false">
+  <configuration default="false" name="Generate Query.scala" type="SbtRunConfiguration" factoryName="sbt Task" show_console_on_std_err="false" show_console_on_std_out="false">
     <option name="allowRunningInParallel" value="false" />
     <option name="projectPathOnTarget" />
     <option name="selectedOptions">
       <list />
     </option>
-    <option name="tasks" value="&quot;calibanGenSchema project/schema.graphql src/main/scala/com/github/nnnnusui/historizer/GetUserServiceQuery.scala --packageName com.github.nnnnusui.historizer --effect GetUserService.IO&quot;" />
+    <option name="tasks" value="&quot;calibanGenSchema project/schema.graphql src/main/scala/com/github/nnnnusui/historizer/Query.scala --packageName com.github.nnnnusui.historizer --effect Service.IO --imports GraphQL._&quot;" />
     <option name="useSbtShell" value="true" />
     <option name="vmparams" value="-Xms512M -Xmx1024M -Xss1M -XX:+CMSClassUnloadingEnabled" />
     <option name="workingDir" value="$PROJECT_DIR$" />

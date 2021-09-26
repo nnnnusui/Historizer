@@ -6,13 +6,13 @@ import caliban.schema.GenericSchema
 import zio.clock.Clock
 import zio.console.Console
 
-object Api extends GenericSchema[GetUserService.Get] {
-  val api: GraphQL[Console with Clock with GetUserService.Get] =
+object Api extends GenericSchema[Service.Get] {
+  val api: GraphQL[Console with Clock with Service.Get] =
     graphQL(
       RootResolver(
         Operations.Query(
-          args => GetUserService.findUser(args.id),
-          GetUserService.findUsers
+//          args => Service.find(args.id),
+          Service.findParagraphs
         )
       )
     )

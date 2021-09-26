@@ -1,9 +1,14 @@
 type Query {
-    user(id: Int!): User
-    users: [User!]!
+#    section(id: Int!): Section
+#    sections: [Section!]!
+    paragraphs: [Paragraph!]!
 }
 
-type User {
-    id: Int!
-    name: String!
+#type Section {
+#    id: Int!
+#}
+
+type Paragraph {
+    id: ID!
+    content: String!
 }
