@@ -7,7 +7,6 @@
     "build": "parcel build"
   },
   "devDependencies": {
-    "@apollo/client": "^3.4.13",
     "@graphql-codegen/cli": "2.2.0",
     "@graphql-codegen/introspection": "2.1.0",
     "@graphql-codegen/typescript": "2.2.2",
@@ -18,9 +17,8 @@
     "parcel": "^2.0.0-rc.0"
   },
   "dependencies": {
-    "apollo-boost": "^0.4.9",
-    "graphql": "^14.7.0",
-    "graphql-tag": "^2.12.5",
-    "react-apollo": "^3.1.5"
+    "@apollo/client": "^3.4.13",
+    "graphql": "^15.6.0",
+    "react-dom": "^17.0.2"
   }
 }

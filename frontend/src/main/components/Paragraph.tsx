@@ -1,9 +1,9 @@
 import React from "react";
-import { useEditParagraphMutation } from "../generated/graphql";
-import { Schema } from "../Schema";
+import { Schema } from "../graphql/Schema";
 
 export const Paragraph: React.FC<Schema.Paragraph> = (props) => {
-  const [editParagraph, { data, loading, error }] = useEditParagraphMutation();
+  const [editParagraph, { data, loading, error }] =
+    Schema.useEditParagraphMutation();
   if (loading) return <p>submitting...</p>;
   if (error) return <p>{error.message}</p>;
 

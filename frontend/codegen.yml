@@ -4,11 +4,11 @@ documents:
   - ./src/main/graphql/query.ts
   - ./src/main/graphql/mutation.ts
 generates:
-  ./src/types/generated/graphql.ts:
+  ./src/main/graphql/generated.ts:
     plugins:
       - "typescript"
       - "typescript-operations"
       - "typescript-react-apollo"
-  ./graphql.schema.json:
+  ./src/main/graphql/generated.schema.json:
     plugins:
       - "introspection"
