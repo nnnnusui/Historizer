@@ -1,0 +1,25 @@
+{
+  "name": "my-project",
+  "source": "src/index.pug",
+  "scripts": {
+    "codegen": "graphql-codegen --config codegen.yml",
+    "start": "parcel",
+    "build": "parcel build"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "2.2.0",
+    "@graphql-codegen/introspection": "2.1.0",
+    "@graphql-codegen/typescript": "2.2.2",
+    "@graphql-codegen/typescript-operations": "2.1.4",
+    "@graphql-codegen/typescript-react-apollo": "3.1.4",
+    "@parcel/transformer-pug": "^2.0.0-rc.0",
+    "@parcel/transformer-stylus": "^2.0.0-rc.0",
+    "parcel": "^2.0.0-rc.0"
+  },
+  "dependencies": {
+    "apollo-boost": "^0.4.9",
+    "graphql": "^14.7.0",
+    "graphql-tag": "^2.12.5",
+    "react-apollo": "^3.1.5"
+  }
+}
