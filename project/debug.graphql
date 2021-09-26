@@ -3,3 +3,12 @@
 query ScratchQuery {
     paragraphs { id content }
 }
+
+mutation ScratchMutation {
+    editParagraph(
+        id: "1",
+        offset: 2,
+        length: 4,
+        to: "'hoaa~~~'",
+    ) { id content }
+}

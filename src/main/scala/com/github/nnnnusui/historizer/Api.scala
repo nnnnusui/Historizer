@@ -13,10 +13,10 @@ object Api extends GenericSchema[Service.Get] {
         Operations.Query(
           Service.findParagraphs,
           args => Service.findParagraph(args.id),
+        ),
+        Operations.Mutation(
+          args => Service.editParagraph(args),
         )
-//        Operations.Mutation(
-//          args =>
-//        )
       )
     )
 }
