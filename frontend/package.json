@@ -7,6 +7,7 @@
     "build": "parcel build"
   },
   "devDependencies": {
+    "@apollo/client": "^3.4.13",
     "@graphql-codegen/cli": "2.2.0",
     "@graphql-codegen/introspection": "2.1.0",
     "@graphql-codegen/typescript": "2.2.2",

@@ -2,7 +2,7 @@ import gql from "graphql-tag";
 
 export const EditParagraph = gql`
   mutation editParagraph(
-    $id: ID!,
+    $id: String!,
     $offset: Int!,
     $length: Int!,
     $to: String!,

@@ -1,14 +1,9 @@
 import React from "react";
-import { useMutation } from "react-apollo";
-import { MutationEditParagraphArgs } from "../generated/graphql";
-import { EditParagraph } from "../graphql/mutation";
+import { useEditParagraphMutation } from "../generated/graphql";
 import { Schema } from "../Schema";
 
 export const Paragraph: React.FC<Schema.Paragraph> = (props) => {
-  const [editParagraph, { data, loading, error }] = useMutation<
-    Schema.Mutation,
-    MutationEditParagraphArgs
-  >(EditParagraph);
+  const [editParagraph, { data, loading, error }] = useEditParagraphMutation();
   if (loading) return <p>submitting...</p>;
   if (error) return <p>{error.message}</p>;
 
