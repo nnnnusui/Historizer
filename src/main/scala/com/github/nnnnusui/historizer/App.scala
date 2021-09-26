@@ -5,6 +5,7 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives.path
 import caliban.interop.circe.AkkaHttpCirceAdapter
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import zio.Runtime
 import zio.clock.Clock
 import zio.console.Console
@@ -18,13 +19,15 @@ object App extends App with AkkaHttpCirceAdapter {
 
   implicit val executionContext: ExecutionContextExecutor = system.executionContext
 
-  implicit val runtime: Runtime[GetUserService.Get with Console with Clock] =
-    Runtime.unsafeFromLayer(GetUserService.make() ++ Console.live ++ Clock.live, Platform.default)
+  implicit val runtime: Runtime[Service.Get with Console with Clock] =
+    Runtime.unsafeFromLayer(Service.make() ++ Console.live ++ Clock.live, Platform.default)
 
   val interpreter = runtime.unsafeRun(Api.api.interpreter)
 
-  val route = path("graphql") {
-    adapter.makeHttpService(interpreter)
+  val route = cors() {
+    path("graphql") {
+      adapter.makeHttpService(interpreter)
+    }
   }
 
   val bindingFuture = Http().newServerAt("localhost", 8088).bind(route)

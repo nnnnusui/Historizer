@@ -12,6 +12,7 @@ libraryDependencies ++= Seq(
   "com.github.ghostdogpr" %% "caliban"           % CalibanVersion,
   "com.github.ghostdogpr" %% "caliban-akka-http" % CalibanVersion,
   "de.heikoseeberger"     %% "akka-http-circe"   % "1.38.2",
+  "ch.megard" %% "akka-http-cors" % "1.1.2",
 )
 
 enablePlugins(CalibanPlugin)
