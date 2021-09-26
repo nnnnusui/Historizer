@@ -5,7 +5,8 @@ import Types._
 import GraphQL._
 
 object Types {
-
+  case class QueryParagraphArgs(id: ID)
+  case class MutationEditParagraphArgs(paragraphId: ID, from: Int, to: Int)
   case class Paragraph(id: ID, content: String)
 
 }
@@ -13,7 +14,12 @@ object Types {
 object Operations {
 
   case class Query(
-      paragraphs: Service.IO[List[Paragraph]]
+      paragraphs: Service.IO[List[Paragraph]],
+      paragraph: QueryParagraphArgs => Service.IO[Option[Paragraph]]
+  )
+
+  case class Mutation(
+      editParagraph: MutationEditParagraphArgs => Service.IO[Paragraph]
   )
 
 }

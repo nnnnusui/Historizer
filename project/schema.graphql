@@ -1,12 +1,11 @@
 type Query {
-#    section(id: Int!): Section
-#    sections: [Section!]!
     paragraphs: [Paragraph!]!
+    paragraph(id: ID!): Paragraph
 }
 
-#type Section {
-#    id: Int!
-#}
+type Mutation {
+    editParagraph(paragraphId: ID!, from: Int!, to: Int!): Paragraph!
+}
 
 type Paragraph {
     id: ID!

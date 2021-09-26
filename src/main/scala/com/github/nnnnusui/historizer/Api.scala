@@ -11,9 +11,12 @@ object Api extends GenericSchema[Service.Get] {
     graphQL(
       RootResolver(
         Operations.Query(
-//          args => Service.find(args.id),
-          Service.findParagraphs
+          Service.findParagraphs,
+          args => Service.findParagraph(args.id),
         )
+//        Operations.Mutation(
+//          args =>
+//        )
       )
     )
 }
