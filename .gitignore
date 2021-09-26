@@ -8,3 +8,5 @@ out/
 target/
 project/boot/
 project/plugins/project/
+
+src/main/scala/com/github/nnnnusui/historizer/Query.scala
