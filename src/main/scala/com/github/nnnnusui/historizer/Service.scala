@@ -1,32 +1,64 @@
 package com.github.nnnnusui.historizer
 
-import com.github.nnnnusui.historizer.Types._
 import com.github.nnnnusui.historizer.GraphQL.ID
-import zio.{Has, Ref, UIO, URIO, ZLayer}
+import com.github.nnnnusui.historizer.Types._
+import com.github.nnnnusui.historizer.domain.Paragraph
+import zio.{Has, Ref, Runtime, UIO, URIO, ZIO, ZLayer}
 
 object Service {
-
   trait Service {
     def findParagraphs: UIO[List[Paragraph]]
     def findParagraph(id: ID): UIO[Option[Paragraph]]
-    def editParagraph(args: MutationEditParagraphArgs): UIO[Option[Paragraph]]
+    def addParagraph(args: MutationAddParagraphArgs): UIO[Paragraph]
+    def removeText(args: MutationRemoveTextArgs): UIO[Option[Paragraph]]
+    def addText(args: MutationAddTextArgs): UIO[Option[Paragraph]]
   }
-  type Get = Has[Service]
-  type IO[A] = URIO[Get, A]
+  type Get   = Has[Service]
+  type IO[A] = ZIO[Get, Throwable, A]
 
-  def findParagraphs: IO[List[Paragraph]] = URIO.accessM(_.get.findParagraphs)
+  def findParagraphs: IO[List[Paragraph]]          = URIO.accessM(_.get.findParagraphs)
   def findParagraph(id: ID): IO[Option[Paragraph]] = URIO.accessM(_.get.findParagraph(id))
-  def editParagraph(args: MutationEditParagraphArgs): IO[Option[Paragraph]] = URIO.accessM(_.get.editParagraph(args))
+  def addParagraph(args: MutationAddParagraphArgs): IO[Paragraph] =
+    URIO.accessM(_.get.addParagraph(args))
+  def removeText(args: MutationRemoveTextArgs): IO[Option[Paragraph]] =
+    URIO.accessM(_.get.removeText(args))
+  def addText(args: MutationAddTextArgs): IO[Option[Paragraph]] =
+    URIO.accessM(_.get.addText(args))
 
-  def make(initial: List[Paragraph] = List(Paragraph("1", "Sample paragraph"))): ZLayer[Any, Nothing, Get] = ZLayer.fromEffect {
-    for {
-      paragraphs <- Ref.make(initial)
-    } yield new Service {
+  def make(): ZLayer[Any, Nothing, Get] =
+    ZLayer.fromEffect {
+      type Repository = repository.Paragraph
+      for {
+        _ <- Ref.make(None)
+      } yield new Service {
+        val repository = new Repository with H2Database
+        import repository._
+        Runtime.default.unsafeRun(repository.setup)
 
-      def findParagraphs = paragraphs.get
-      def findParagraph(id: ID) = paragraphs.get.map(_.find(_.id == id))
-      def editParagraph(args: MutationEditParagraphArgs) = paragraphs.get.map(_.find(_.id == args.id).map(it => it.copy(content = it.content.patch(args.offset, args.to, args.length))))
+        def findParagraphs        = paragraph.getAll.map(_.toList).orDie
+        def findParagraph(id: ID) = paragraph.getBy(id).orDie
+        def addParagraph(args: MutationAddParagraphArgs) =
+          paragraph.create(Paragraph(_, args.content)).orDie
+        def removeText(args: MutationRemoveTextArgs) =
+          paragraph
+            .getBy(args.paragraphId)
+            .flatMap {
+              case None => ZIO.none
+              case Some(it) =>
+                paragraph.update(it.copy(content = it.content.patch(args.offset, "", args.length)))
+            }
+            .orDie
+        def addText(args: MutationAddTextArgs): UIO[Option[Paragraph]] =
+          paragraph
+            .getBy(args.paragraphId)
+            .flatMap {
+              case None => ZIO.none
+              case Some(it) =>
+                paragraph.update(it.copy(content = it.content.patch(args.offset, args.text, 0)))
+            }
+            .orDie
+
+      }
     }
-  }
 
 }

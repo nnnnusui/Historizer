@@ -1,14 +1,17 @@
 # run with `JS GraphQL`: https://jimkyndemeyer.github.io/js-graphql-intellij-plugin/
 
-query ScratchQuery {
+query Paragraphs {
     paragraphs { id content }
 }
 
+mutation AddParagraph {
+    addParagraph(content: "てすとぱらぐらふ～") { id content }
+}
+
 mutation ScratchMutation {
-    editParagraph(
-        id: "1",
+    removeText(
+        paragraphId: 1,
         offset: 2,
         length: 4,
-        to: "'hoaa~~~'",
     ) { id content }
 }
