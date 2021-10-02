@@ -14,16 +14,13 @@ import zio.internal.Platform
 import scala.concurrent.ExecutionContextExecutor
 
 object App extends App with AkkaHttpCirceAdapter {
-
-  implicit val system: ActorSystem[String] = ActorSystem(Behaviors.empty[String], "example-app")
-
+  val appName                                             = "historizer"
+  implicit val system: ActorSystem[String]                = ActorSystem(Behaviors.empty[String], appName)
   implicit val executionContext: ExecutionContextExecutor = system.executionContext
-
   implicit val runtime: Runtime[Service.Get with Console with Clock] =
-    Runtime.unsafeFromLayer(Service.make() ++ Console.live ++ Clock.live, Platform.default)
+    Runtime.unsafeFromLayer(Service.make ++ Console.live ++ Clock.live, Platform.default)
 
   val interpreter = runtime.unsafeRun(Api.api.interpreter)
-
   val route = cors() {
     path("graphql") {
       adapter.makeHttpService(interpreter)

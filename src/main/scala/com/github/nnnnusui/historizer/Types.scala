@@ -1,6 +1,5 @@
 package com.github.nnnnusui.historizer
 
-import com.github.nnnnusui.historizer.GraphQL.ID
 import com.github.nnnnusui.historizer.domain.Paragraph
 
 object Types {
@@ -18,7 +17,7 @@ object Types {
 
   case class QueryParagraphArgs(id: Paragraph.ID)
 
-  case class MutationRemoveTextArgs(paragraphId: ID, offset: Int, length: Int)
+  case class MutationRemoveTextArgs(paragraphId: Paragraph.ID, offset: Int, length: Int)
   case class MutationAddParagraphArgs(content: String)
-  case class MutationAddTextArgs(paragraphId: ID, offset: Int, text: String)
+  case class MutationAddTextArgs(paragraphId: Paragraph.ID, offset: Int, text: String)
 }
