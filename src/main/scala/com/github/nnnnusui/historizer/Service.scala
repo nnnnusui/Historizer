@@ -1,7 +1,7 @@
 package com.github.nnnnusui.historizer
 
 import com.github.nnnnusui.historizer.Types._
-import com.github.nnnnusui.historizer.domain.Paragraph
+import com.github.nnnnusui.historizer.domain.{Action, Paragraph}
 import com.github.nnnnusui.historizer.interop.slick.zio.UsesDatabase
 import zio.{Has, UIO, URIO, ZIO, ZLayer}
 
@@ -47,15 +47,17 @@ object Service {
                 paragraph.update(it.copy(content = it.content.patch(args.offset, "", args.length)))
             }
             .orDie
-        def addText(args: MutationAddTextArgs) =
+        def addText(args: MutationAddTextArgs) = {
+//          val action = Action.Add(args.text, args.offset)
           paragraph
             .getBy(args.paragraphId)
-            .flatMap {
-              case None => ZIO.none
-              case Some(it) =>
-                paragraph.update(it.copy(content = it.content.patch(args.offset, args.text, 0)))
-            }
+            .flatMap(
+              _.map(it => it.copy(content = it.content.patch(args.offset, args.text, 0)))
+                .map(paragraph.update)
+                .getOrElse(ZIO.none)
+            )
             .orDie
+        }
 
       }
     }
