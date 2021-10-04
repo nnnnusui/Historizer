@@ -14,13 +14,13 @@ object Api extends GenericSchema[Service.Get] {
     graphQL(
       RootResolver(
         Operations.Query(
-          Service.findParagraphs,
-          args => Service.findParagraph(args)
+          Service.findTexts,
+          Service.findText
         ),
         Operations.Mutation(
-          args => Service.addParagraph(args),
-          args => Service.removeText(args),
-          args => Service.addText(args)
+          Service.newText,
+          Service.removeText,
+          Service.addText
         )
       )
     ) @@ printErrors

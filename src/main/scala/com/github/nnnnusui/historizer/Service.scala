@@ -1,32 +1,32 @@
 package com.github.nnnnusui.historizer
 
 import com.github.nnnnusui.historizer.Types._
-import com.github.nnnnusui.historizer.domain.{Action, Paragraph}
+import com.github.nnnnusui.historizer.domain.{Action, Paragraph, Text}
 import com.github.nnnnusui.historizer.interop.slick.zio.UsesDatabase
 import zio.{Has, UIO, URIO, ZIO, ZLayer}
 
 object Service {
   trait Service {
-    def findParagraphs: UIO[List[Paragraph]]
-    def findParagraph(args: QueryParagraphArgs): UIO[Option[Paragraph]]
-    def addParagraph(args: MutationAddParagraphArgs): UIO[Paragraph]
-    def removeText(args: MutationRemoveTextArgs): UIO[Option[Paragraph]]
-    def addText(args: MutationAddTextArgs): UIO[Option[Paragraph]]
+    def findTexts: UIO[List[Text]]
+    def findText(args: QueryTextArgs): UIO[Option[Text]]
+    def newText(args: MutationNewTextArgs): UIO[Text]
+    def removeText(args: MutationRemoveTextArgs): UIO[Option[Text]]
+    def addText(args: MutationAddTextArgs): UIO[Option[Text]]
   }
   type Get   = Has[Service]
   type IO[A] = ZIO[Get, Throwable, A]
 
-  def findParagraphs: IO[List[Paragraph]] = URIO.accessM(_.get.findParagraphs)
-  def findParagraph(args: QueryParagraphArgs): IO[Option[Paragraph]] =
-    URIO.accessM(_.get.findParagraph(args))
-  def addParagraph(args: MutationAddParagraphArgs): IO[Paragraph] =
-    URIO.accessM(_.get.addParagraph(args))
-  def removeText(args: MutationRemoveTextArgs): IO[Option[Paragraph]] =
-    URIO.accessM(_.get.removeText(args))
-  def addText(args: MutationAddTextArgs): IO[Option[Paragraph]] =
-    URIO.accessM(_.get.addText(args))
+  def findTexts: IO[List[Text]] = URIO.accessM(_.get.findTexts)
+  def findText(input: Input[QueryTextArgs]): IO[Option[Text]] =
+    URIO.accessM(_.get.findText(input.args))
+  def newText(input: Input[MutationNewTextArgs]): IO[Text] =
+    URIO.accessM(_.get.newText(input.args))
+  def removeText(input: Input[MutationRemoveTextArgs]): IO[Option[Text]] =
+    URIO.accessM(_.get.removeText(input.args))
+  def addText(input: Input[MutationAddTextArgs]): IO[Option[Text]] =
+    URIO.accessM(_.get.addText(input.args))
 
-  type Repository = repository.Paragraph
+  type Repository = repository.Text
   def make: ZLayer[Any, Nothing, Get] =
     ZLayer.fromEffect {
       for {
@@ -34,26 +34,25 @@ object Service {
       } yield new Service {
         import repository._
 
-        def findParagraphs                          = paragraph.getAll.map(_.toList).orDie
-        def findParagraph(args: QueryParagraphArgs) = paragraph.getBy(args.id).orDie
-        def addParagraph(args: MutationAddParagraphArgs) =
-          paragraph.create(Paragraph(_, args.content)).orDie
+        def findTexts                          = text.getAll.map(_.toList).orDie
+        def findText(args: QueryTextArgs)      = text.getBy(args.id).orDie
+        def newText(args: MutationNewTextArgs) = text.create(Text(_, args.value)).orDie
         def removeText(args: MutationRemoveTextArgs) =
-          paragraph
-            .getBy(args.paragraphId)
+          text
+            .getBy(args.textId)
             .flatMap {
-              case None => ZIO.none
-              case Some(it) =>
-                paragraph.update(it.copy(content = it.content.patch(args.offset, "", args.length)))
+              _.map(it => it.copy(value = it.value.patch(args.offset, "", args.length)))
+                .map(text.update)
+                .getOrElse(ZIO.none)
             }
             .orDie
         def addText(args: MutationAddTextArgs) = {
-//          val action = Action.Add(args.text, args.offset)
-          paragraph
-            .getBy(args.paragraphId)
+          val action = Action.Add(args.text, args.offset)
+          text
+            .getBy(args.textId)
             .flatMap(
-              _.map(it => it.copy(content = it.content.patch(args.offset, args.text, 0)))
-                .map(paragraph.update)
+              _.map(it => it.copy(value = it.value.patch(args.offset, args.text, 0)))
+                .map(text.update)
                 .getOrElse(ZIO.none)
             )
             .orDie
