@@ -20,7 +20,8 @@ object Api extends GenericSchema[Service.Get] {
         Operations.Mutation(
           Service.newText,
           Service.removeText,
-          Service.addText
+          Service.addText,
+          Service.undo
         )
       )
     ) @@ printErrors

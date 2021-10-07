@@ -11,7 +11,8 @@ object Types {
     case class Mutation(
         newText: Input[MutationNewTextArgs] => Service.IO[Text],
         removeText: Input[MutationRemoveTextArgs] => Service.IO[Option[Text]],
-        addText: Input[MutationAddTextArgs] => Service.IO[Option[Text]]
+        addText: Input[MutationAddTextArgs] => Service.IO[Option[Text]],
+        undo: Input[MutationAddTextArgs] => Service.IO[Option[Text]]
     )
   }
 
@@ -21,4 +22,5 @@ object Types {
   case class MutationNewTextArgs(value: String)
   case class MutationRemoveTextArgs(textId: Text.ID, offset: Int, length: Int)
   case class MutationAddTextArgs(textId: Text.ID, offset: Int, text: String)
+  case class MutationUndoArgs(textId: Text.ID)
 }

@@ -1,23 +1,12 @@
 import { gql } from "@apollo/client";
 
-export const GetParagraphs = gql`
-  query getParagraphs {
-    paragraphs { id content }
+export const GetTexts = gql`
+  query getTexts {
+    texts { id value }
   }
 `;
-
-// export const GetSections = gql`
-//   query getSections {
-//     paragraphs {
-//       id
-//     }
-//   }
-// `
-
-// export const GetSection = gql`
-//   query getSection($id: Int!) {
-//     section(id: $id) {
-//       id
-//     }
-//   }
-// `;
+export const GetText = gql`
+  query getText($args: QueryTextArgsInput!) {
+    text(args: $args) { value }
+  }
+`
