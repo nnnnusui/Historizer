@@ -20,7 +20,7 @@ object App extends App with AkkaHttpCirceAdapter {
   implicit val executionContext: ExecutionContextExecutor = system.executionContext
 
   implicit val runtime: Runtime[Service.Get with Console with Clock] =
-    Runtime.unsafeFromLayer(Service.make() ++ Console.live ++ Clock.live, Platform.default)
+    Runtime.unsafeFromLayer(Service.make ++ Console.live ++ Clock.live, Platform.default)
 
   val interpreter = runtime.unsafeRun(Api.api.interpreter)
 
