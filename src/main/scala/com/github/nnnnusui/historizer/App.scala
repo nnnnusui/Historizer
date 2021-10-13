@@ -3,9 +3,10 @@ package com.github.nnnnusui.historizer
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Directives.path
+import akka.http.scaladsl.server.Directives._
 import caliban.interop.circe.AkkaHttpCirceAdapter
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
+import com.github.nnnnusui.historizer.controller.Api
 import zio.Runtime
 import zio.clock.Clock
 import zio.console.Console
@@ -25,8 +26,10 @@ object App extends App with AkkaHttpCirceAdapter {
   val interpreter = runtime.unsafeRun(Api.api.interpreter)
 
   val route = cors() {
-    path("graphql") {
+    path("api" / "graphql") {
       adapter.makeHttpService(interpreter)
+    } ~ path("ws" / "graphql") {
+      adapter.makeWebSocketService(interpreter)
     }
   }
 
