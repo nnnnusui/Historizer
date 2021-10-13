@@ -1,0 +1,27 @@
+{
+  "name": "historizer-frontend",
+  "source": "src/index.pug",
+  "scripts": {
+    "codegen": "graphql-codegen --config codegen.yml",
+    "start": "parcel",
+    "build": "parcel build"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "2.2.0",
+    "@graphql-codegen/introspection": "2.1.0",
+    "@graphql-codegen/typed-document-node": "^2.1.4",
+    "@graphql-codegen/typescript": "2.2.2",
+    "@graphql-codegen/typescript-operations": "2.1.6",
+    "@graphql-codegen/typescript-react-apollo": "3.1.4",
+    "@parcel/transformer-pug": "^2.0.0-rc.0",
+    "@parcel/transformer-stylus": "^2.0.0-rc.0",
+    "parcel": "^2.0.0-rc.0"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.4.16",
+    "@types/react": "^17.0.29",
+    "graphql": "^15.6.1",
+    "react-dom": "^17.0.2",
+    "subscriptions-transport-ws": "^0.9.19"
+  }
+}

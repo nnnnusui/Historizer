@@ -1,0 +1,26 @@
+query GetArticles {
+  articles {
+    id
+    title
+  }
+}
+
+query GetArticle($args: QueryArticleArgsInput!) {
+  article(args: $args) {
+    title
+  }
+}
+
+mutation AddArticle($args: MutationAddArticleArgsInput!) {
+  addArticle(args: $args) {
+    id
+    title
+  }
+}
+
+subscription AddedArticle {
+  addedArticle {
+    id
+    title
+  }
+}
