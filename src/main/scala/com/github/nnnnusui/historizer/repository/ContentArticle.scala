@@ -2,7 +2,6 @@ package com.github.nnnnusui.historizer.repository
 
 import com.github.nnnnusui.historizer.domain.content.Article
 import com.github.nnnnusui.historizer.interop.slick.zio.UsesDatabase
-import zio.stream.ZStream
 
 trait ContentArticle { self: UsesDatabase with ContentRoot =>
   import profile.api._

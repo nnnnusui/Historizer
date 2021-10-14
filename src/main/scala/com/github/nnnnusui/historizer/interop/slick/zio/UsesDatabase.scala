@@ -1,9 +1,7 @@
 package com.github.nnnnusui.historizer.interop.slick.zio
 
 import slick.jdbc.JdbcProfile
-import zio.stream.ZStream
 import zio.{IO, UIO, ZIO}
-import zio.interop.reactivestreams._
 
 import scala.concurrent.ExecutionContext
 
