@@ -16,6 +16,7 @@ import zio.console.Console
 import zio.internal.Platform
 
 import scala.concurrent.ExecutionContextExecutor
+import scala.io.StdIn
 
 object App extends App with AkkaHttpCirceAdapter {
 
@@ -28,7 +29,9 @@ object App extends App with AkkaHttpCirceAdapter {
 
   val interpreter = runtime.unsafeRun(Api.api.interpreter)
 
-  val publishDir = ConfigFactory.load().getString("publishDir")
+  val config     = ConfigFactory.load()
+  val publishDir = config.getString("publishDir")
+  val port       = config.getInt("port")
   val route =
     cors() {
       path("api" / "graphql") {
@@ -40,11 +43,12 @@ object App extends App with AkkaHttpCirceAdapter {
       } ~ getFromDirectory(publishDir)
     }
 
-  val bindingFuture = Http().newServerAt("localhost", 8088).bind(route)
-
-  sys.addShutdownHook {
-    bindingFuture
-      .flatMap(_.unbind())
-      .onComplete(_ => system.terminate())
-  }
+  val server        = Http().newServerAt("localhost", port)
+  val bindingFuture = server.bind(route)
+  println(s"Server running at http://localhost:${port}")
+  println("Press RETURN to stop...")
+  StdIn.readLine()
+  bindingFuture
+    .flatMap(_.unbind())
+    .onComplete(_ => system.terminate())
 }
