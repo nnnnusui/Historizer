@@ -1,5 +1,6 @@
 import { useQuery } from "@apollo/client";
 import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   AddedArticleDocument,
   GetArticlesDocument,
@@ -30,7 +31,9 @@ export const ArticleList: React.FC = () => {
   return (
     <ul>
       {articles.map(({ id, title }) => (
-        <li key={id}>{title}</li>
+        <li key={id}>
+          <Link to={`/${id}`}>{title}</Link>
+        </li>
       ))}
     </ul>
   );
