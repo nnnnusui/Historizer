@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="App Dev" type="CompoundRunConfigurationType">
+    <toRun name="npm watch" type="ShConfigurationType" />
+    <toRun name="App" type="Application" />
+    <method v="2" />
+  </configuration>
+</component>

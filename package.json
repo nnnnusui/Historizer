@@ -4,7 +4,7 @@
   "scripts": {
     "codegen": "graphql-codegen --config src/main/graphql/codegen.yml",
     "start": "parcel",
-    "watch": "parcel watch",
+    "watch": "lock parcel watch",
     "build": "parcel build",
     "sbt": "sbt run"
   },
@@ -17,6 +17,7 @@
     "@graphql-codegen/typescript-react-apollo": "3.1.4",
     "@parcel/transformer-pug": "^2.0.0-rc.0",
     "@parcel/transformer-stylus": "^2.0.0-rc.0",
+    "npm-run-lock": "^0.9.4",
     "parcel": "^2.0.0-rc.0"
   },
   "dependencies": {
