@@ -1,12 +1,12 @@
 {
   "name": "historizer-frontend",
-  "source": "src/index.pug",
+  "source": "src/main/parcel/index.pug",
   "scripts": {
-    "codegen": "graphql-codegen --config codegen.yml",
-    "start": "parcel --dist-dir ../publish",
-    "watch": "parcel watch --dist-dir ../publish",
-    "build": "parcel build --dist-dir ../publish",
-    "sbt": "cd ../ && sbt run"
+    "codegen": "graphql-codegen --config src/main/graphql/codegen.yml",
+    "start": "parcel",
+    "watch": "parcel watch",
+    "build": "parcel build",
+    "sbt": "sbt run"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "2.2.0",

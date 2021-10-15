@@ -1,12 +1,17 @@
+# IDE
 .bsp/
 .idea/*
 !.idea/codeStyles/
 !.idea/runConfigurations/
 !.idea/misc.xml
-out/
 
+# server side
 target/
 project/boot/
 project/plugins/project/
 
-publish/
+# client side
+.parcel-cache
+node_modules
+dist/
+src/main/parcel/script/graphql/generated*
