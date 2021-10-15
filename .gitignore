@@ -8,3 +8,5 @@ out/
 target/
 project/boot/
 project/plugins/project/
+
+publish/
