@@ -40,7 +40,8 @@ object App extends App with AkkaHttpCirceAdapter {
       adapter.makeWebSocketService(interpreter)
     } ~ pathEndOrSingleSlash {
       getFromFile(s"$publishDir/index.html")
-    } ~ getFromDirectory(publishDir)
+    } ~ getFromDirectory(publishDir) ~
+      getFromFile(s"$publishDir/index.html")
 
   val server        = Http().newServerAt("localhost", port)
   val bindingFuture = server.bind(route)
