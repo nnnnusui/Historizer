@@ -6,6 +6,7 @@ import caliban.wrappers.ApolloTracing.apolloTracing
 import caliban.wrappers.Wrappers._
 import caliban.{GraphQL, RootResolver}
 import com.github.nnnnusui.historizer.Service
+import com.github.nnnnusui.historizer.controller.Types._
 import zio.clock.Clock
 import zio.console.Console
 
@@ -27,7 +28,6 @@ object Api extends GenericSchema[Service.Get] {
           Service.addedArticle
         )
       )
-    import Types._
     import Output._
     case class Query(
         articles: Service.IO[Seq[Article]],

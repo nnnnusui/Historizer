@@ -3,8 +3,7 @@ package com.github.nnnnusui.historizer.controller
 import com.github.nnnnusui.historizer.domain
 
 object Types {
-  type ID            = Int
-  type Identified[T] = (ID, T)
+  type ID = String
   object Output {
     case class Article(id: ID, title: String)
   }
@@ -16,8 +15,9 @@ object Types {
   // implicits
   import domain._
   import content._
+  type Identified[T] = (Int, T)
   implicit class ArticleOutputFromDomain(self: Identified[Article]) {
     val (id, article)            = self
-    def toOutput: Output.Article = Output.Article(id, article.title)
+    def toOutput: Output.Article = Output.Article(id.toString, article.title)
   }
 }

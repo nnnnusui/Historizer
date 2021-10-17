@@ -66,7 +66,7 @@ object Service {
         } yield (id, article).toOutput
       }.orDie
       override def findArticle(args: QueryArticleArgs) = {
-        val id = args.id
+        val id = args.id.toInt
         for {
           mayBeArticle <- contentArticle.getBy(id)
         } yield for {
