@@ -4,7 +4,7 @@ version := "0.1"
 
 scalaVersion := "2.13.6"
 
-val CalibanVersion       = "1.1.1"
+val CalibanVersion       = "1.2.1"
 val AkkaHttpCirceVersion = "1.35.3"
 
 libraryDependencies ++= Seq(
