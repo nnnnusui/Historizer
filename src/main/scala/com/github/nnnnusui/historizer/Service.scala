@@ -23,7 +23,7 @@ object Service {
 //    // Content (id != parentId)
     def findContent(args: QueryContentArgs): UIO[Option[Output.Content]]
     def addContent(args: MutationAddContentArgs): UIO[Output.Content]
-//    def addedContent(args: SubscriptionAddedContent): UStream[Output.Content]
+    def addedContent(args: SubscriptionAddedContentArgs): UStream[Output.Content]
 //    def updateContent() // Identified[Content] => content.update => history.create
 //
 //    // Text(contentId: ID, value: String)
@@ -50,8 +50,12 @@ object Service {
   def addedArticle: Stream[Output.Article] =
     ZStream.accessStream(_.get.addedArticle)
 
+  def findContent(input: Input[QueryContentArgs]): IO[Option[Output.Content]] =
+    URIO.accessM(_.get.findContent(input.args))
   def addContent(input: Input[MutationAddContentArgs]): IO[Output.Content] =
     URIO.accessM(_.get.addContent(input.args))
+  def addedContent(input: Input[SubscriptionAddedContentArgs]): Stream[Output.Content] =
+    ZStream.accessStream(_.get.addedContent(input.args))
 
   def make: ZLayer[Any, Nothing, Get] = ZLayer.fromEffect {
     for {
@@ -97,19 +101,25 @@ object Service {
         for {
           mayBeContent <- contentParagraph.getBy(id)
         } yield for {
-          content <- mayBeContent
-        } yield (id, content).toOutput
+          (parentId, content) <- mayBeContent
+        } yield (id, content).toOutput(parentId.toString)
       }.orDie
 
       override def addContent(args: MutationAddContentArgs) = {
         args.toDomain match {
           case it: Content.Paragraph.type =>
             for {
-              id <- contentParagraph.create(it)
-            } yield (id, it).toOutput
+              id <- contentParagraph.create(args.parentId.toInt, it)
+            } yield (id, it).toOutput(args.parentId)
         }
       }.tap(addedContentHub.publish).orDie
 
+      override def addedContent(args: SubscriptionAddedContentArgs) =
+        ZStream.unwrapManaged(
+          addedContentHub.subscribe
+            .map(_.filterOutput(_.parentId == args.parentId))
+            .map(ZStream.fromQueue(_))
+        )
     }
   }
 }

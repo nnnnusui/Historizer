@@ -7,7 +7,7 @@ object Types {
   case class Input[T](args: T)
   object Output {
     case class Article(id: ID, title: String)
-    case class Content(id: ID)
+    case class Content(id: ID, parentId: ID)
   }
 
   case class QueryArticleArgs(id: ID)
@@ -19,8 +19,8 @@ object Types {
     case object Paragraph extends ContentUnion
 //    case object Section   extends ContentUnion
   }
-  type MutationAddContentArgs = ContentUnion
-  case class SubscriptionAddedContent(parentId: ID)
+  case class MutationAddContentArgs(parentId: ID, content: ContentUnion)
+  case class SubscriptionAddedContentArgs(parentId: ID)
 
   // implicits
   import domain._
@@ -35,12 +35,12 @@ object Types {
   }
 
   implicit class ContentDomainFromInput(self: MutationAddContentArgs) {
-    def toDomain: Content = self match {
+    def toDomain: Content = self.content match {
       case ContentUnion.Paragraph => Content.Paragraph
     }
   }
   implicit class ContentOutputFromDomain(self: Identified[Content]) {
-    val (id, content)            = self
-    def toOutput: Output.Content = Output.Content(id.toString)
+    val (id, content)                          = self
+    def toOutput(parentId: ID): Output.Content = Output.Content(id.toString, parentId)
   }
 }

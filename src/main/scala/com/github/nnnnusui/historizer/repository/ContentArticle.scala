@@ -20,11 +20,18 @@ trait ContentArticle { self: UsesDatabase with ContentRoot =>
       table.result
     }.map(_.map(it => (it.contentId, Article(it.title))))
     override def getBy(id: ID): Out[Option[Article]] = run { implicit it =>
-      joined.filter(_._1.id === id).result.headOption
-    }.map(_.map { case (_, it) => Article(it.title) })
+      for {
+        mayBe <- joined.filter(_._1.id === id).result.headOption
+        closures <- contentRoot.closure
+          .filter(_.ancestorId === mayBe.get._1.id)
+          .result if mayBe.isDefined
+      } yield for {
+        (root, Data(id, title)) <- mayBe
+      } yield Article(title)
+    }
     override def create(self: Article): Out[ID] = run { implicit it =>
       for {
-        id <- contentRoot.createQuery
+        id <- contentRoot.createRootQuery
         _  <- table += Data(id, self.title)
       } yield id
     }

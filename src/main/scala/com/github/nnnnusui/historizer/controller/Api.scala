@@ -19,27 +19,31 @@ object Api extends GenericSchema[Service.Get] {
       RootResolver(
         Query(
           Service.findArticles,
-          Service.findArticle
+          Service.findArticle,
+          Service.findContent
         ),
         Mutation(
           Service.addArticle,
           Service.addContent
         ),
         Subscription(
-          Service.addedArticle
+          Service.addedArticle,
+          Service.addedContent
         )
       )
     import Output._
     case class Query(
         articles: Service.IO[Seq[Article]],
-        article: Input[QueryArticleArgs] => Service.IO[Option[Article]]
+        article: Input[QueryArticleArgs] => Service.IO[Option[Article]],
+        content: Input[QueryContentArgs] => Service.IO[Option[Content]]
     )
     case class Mutation(
         addArticle: Input[MutationAddArticleArgs] => Service.IO[Article],
         addContent: Input[MutationAddContentArgs] => Service.IO[Content]
     )
     case class Subscription(
-        addedArticle: Service.Stream[Article]
+        addedArticle: Service.Stream[Article],
+        addedContent: Input[SubscriptionAddedContentArgs] => Service.Stream[Content]
     )
   }
 

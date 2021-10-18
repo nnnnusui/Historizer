@@ -1,14 +1,32 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import { useParams } from "react-router-dom";
-import { GetArticleDocument } from "../graphql/generated";
+import { AddedContentDocument, GetArticleDocument } from "../graphql/generated";
 import { AddContentForm } from "./AddContentForm";
 
 export const ArticlePage: React.FC = () => {
   const { articleId: id } = useParams<{ articleId: string }>();
-  const { loading, error, data } = useQuery(GetArticleDocument, {
-    variables: { args: { id } },
-  });
+  const { loading, error, data, subscribeToMore } = useQuery(
+    GetArticleDocument,
+    {
+      variables: { args: { id } },
+    }
+  );
+  useEffect(() => {
+    // subscribeToMore({
+    //   document: AddedContentDocument,
+    //   updateQuery: (
+    //     { article },
+    //     {
+    //       subscriptionData: {
+    //         data: { addedContent },
+    //       },
+    //     }
+    //   ) => ({
+    //     articles: [...currents, latest],
+    //   }),
+    // });
+  }, []);
   if (loading) return <p>...loading</p>;
   if (error) return <p>{error.message}</p>;
   const { article } = data;
@@ -18,7 +36,7 @@ export const ArticlePage: React.FC = () => {
   return (
     <>
       <h1>{title}</h1>
-      <AddContentForm />
+      <AddContentForm parentId={id} />
     </>
   );
 };

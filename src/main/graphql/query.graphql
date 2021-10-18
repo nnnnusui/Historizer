@@ -25,8 +25,15 @@ subscription AddedArticle {
   }
 }
 
-mutation AddContent($args: ContentUnion!) {
+mutation AddContent($args: MutationAddContentArgsInput!) {
   addContent(args: $args) {
+    id
+  }
+}
+
+subscription AddedContent($args: SubscriptionAddedContentArgsInput!) {
+  addedContent(args: $args) {
+    parentId
     id
   }
 }

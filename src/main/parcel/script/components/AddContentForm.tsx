@@ -3,7 +3,9 @@ import { useMutation } from "@apollo/client";
 import { AddContentDocument, ContentUnion } from "../graphql/generated";
 import { Editor } from "./Editor";
 
-export const AddContentForm: React.FC = ({}) => {
+export const AddContentForm: React.FC<{ parentId: string }> = ({
+  parentId,
+}) => {
   const [inEdit, setInEdit] = useState<keyof JSX.IntrinsicElements>(null);
   const [addContent, { loading, error }] = useMutation(AddContentDocument);
   if (loading) return <p>...loading</p>;
@@ -27,7 +29,15 @@ export const AddContentForm: React.FC = ({}) => {
       }}
     >
       <span>add: </span>
-      <input type="submit" value="paragraph" onClick={() => setInEdit("p")} />
+      <input
+        type="submit"
+        value="paragraph"
+        onClick={() =>
+          addContent({
+            variables: { args: { content: ContentUnion.Paragraph, parentId } },
+          })
+        }
+      />
       {/* <input
         type="submit"
         value="section"
