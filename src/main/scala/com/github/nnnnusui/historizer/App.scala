@@ -38,8 +38,6 @@ object App extends App with AkkaHttpCirceAdapter {
       adapter.makeHttpService(interpreter)
     } ~ path("ws" / "graphql") {
       adapter.makeWebSocketService(interpreter)
-    } ~ pathEndOrSingleSlash {
-      getFromFile(s"$publishDir/index.html")
     } ~ getFromDirectory(publishDir) ~
       getFromFile(s"$publishDir/index.html")
 

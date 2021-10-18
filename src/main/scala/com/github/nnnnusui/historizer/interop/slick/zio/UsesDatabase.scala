@@ -1,7 +1,7 @@
 package com.github.nnnnusui.historizer.interop.slick.zio
 
 import slick.jdbc.JdbcProfile
-import zio.{IO, UIO, ZIO}
+import zio.{UIO, ZIO}
 
 import scala.concurrent.ExecutionContext
 
@@ -23,8 +23,9 @@ trait UsesDatabase { self =>
   protected val profile: JdbcProfile
   import profile.api._
   protected val database: UIO[Database]
+  type IO[T] = ZIO[Any, Throwable, T]
 
-  protected def run[T](dbio: ExecutionContext => DBIO[T]): IO[Throwable, T] = (
+  protected def run[T](dbio: ExecutionContext => DBIO[T]): IO[T] = (
     for {
       database <- ZIO.accessM[UsesDatabase](_.database)
       result   <- ZIO.fromFuture(executionContext => database.run(dbio(executionContext)))

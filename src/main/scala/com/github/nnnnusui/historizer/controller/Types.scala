@@ -6,41 +6,21 @@ object Types {
   type ID = String
   case class Input[T](args: T)
   object Output {
-    case class Article(id: ID, title: String)
-    case class Content(id: ID)
+    case class Text(id: ID, value: String)
   }
 
-  case class QueryArticleArgs(id: ID)
-  case class MutationAddArticleArgs(title: String)
-
-  case class QueryContentArgs(id: ID)
-  sealed trait ContentUnion
-  object ContentUnion {
-    case object Paragraph extends ContentUnion
-//    case object Section   extends ContentUnion
-  }
-  type MutationAddContentArgs = ContentUnion
-  case class SubscriptionAddedContent(parentId: ID)
+  type TextId = ID
+  case class QueryTextArgs(id: TextId)
+//  case class MutationAddTextArgs()
+//  case class MutationAddPartialTextArgs(textId: TextId, offset: Int, value: String)
+//  case class MutationRemovePartialTextArgs(textId: TextId, offset: Int, length: Int)
+//  case class SubscribeAdded
 
   // implicits
-  import domain._
-  import content._
-  type Identified[T] = (Int, T)
-  implicit class ArticleDomainFromInput(self: MutationAddArticleArgs) {
-    def toDomain: Article = Article(self.title)
-  }
-  implicit class ArticleOutputFromDomain(self: Identified[Article]) {
-    val (id, article)            = self
-    def toOutput: Output.Article = Output.Article(id.toString, article.title)
+  import domain.Text
+  implicit class TextOutputFromDomain(self: Text.Identified) {
+    val (id, Text(value))     = self
+    def toOutput: Output.Text = Output.Text(id, value)
   }
 
-  implicit class ContentDomainFromInput(self: MutationAddContentArgs) {
-    def toDomain: Content = self match {
-      case ContentUnion.Paragraph => Content.Paragraph
-    }
-  }
-  implicit class ContentOutputFromDomain(self: Identified[Content]) {
-    val (id, content)            = self
-    def toOutput: Output.Content = Output.Content(id.toString)
-  }
 }

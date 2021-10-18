@@ -1,32 +1,24 @@
-query GetArticles {
-  articles {
+query GetTexts {
+  texts {
     id
-    title
+    value
   }
 }
-
-query GetArticle($args: QueryArticleArgsInput!) {
-  article(args: $args) {
-    title
+query GetText($args: QueryTextArgsInput!) {
+  text(args: $args) {
+    id
+    value
   }
 }
-
-mutation AddArticle($args: MutationAddArticleArgsInput!) {
-  addArticle(args: $args) {
+mutation AddText {
+  addText {
     id
-    title
+    value
   }
 }
-
-subscription AddedArticle {
-  addedArticle {
+subscription AddedText {
+  addedText {
     id
-    title
-  }
-}
-
-mutation AddContent($args: ContentUnion!) {
-  addContent(args: $args) {
-    id
+    value
   }
 }

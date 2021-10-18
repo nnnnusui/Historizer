@@ -18,28 +18,26 @@ object Api extends GenericSchema[Service.Get] {
     def resolver: RootResolver[Query, Mutation, Subscription] =
       RootResolver(
         Query(
-          Service.findArticles,
-          Service.findArticle
+          texts = Service.findTexts,
+          text = Service.findText
         ),
         Mutation(
-          Service.addArticle,
-          Service.addContent
+          addText = Service.addText
         ),
         Subscription(
-          Service.addedArticle
+          addedText = Service.addedText
         )
       )
     import Output._
     case class Query(
-        articles: Service.IO[Seq[Article]],
-        article: Input[QueryArticleArgs] => Service.IO[Option[Article]]
+        texts: Service.IO[Seq[Text]],
+        text: Input[QueryTextArgs] => Service.IO[Option[Text]]
     )
     case class Mutation(
-        addArticle: Input[MutationAddArticleArgs] => Service.IO[Article],
-        addContent: Input[MutationAddContentArgs] => Service.IO[Content]
+        addText: Service.IO[Text]
     )
     case class Subscription(
-        addedArticle: Service.Stream[Article]
+        addedText: Service.Stream[Text]
     )
   }
 
