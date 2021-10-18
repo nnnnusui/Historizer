@@ -24,3 +24,9 @@ subscription AddedArticle {
     title
   }
 }
+
+mutation AddContent($args: ContentUnion!) {
+  addContent(args: $args) {
+    id
+  }
+}

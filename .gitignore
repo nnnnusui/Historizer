@@ -15,4 +15,5 @@ project/plugins/project/
 node_modules
 dist/
 src/main/parcel/script/graphql/generated*
+src/main/graphql/generated*
 .lock

@@ -1,7 +1,7 @@
 package com.github.nnnnusui.historizer
 
 import com.github.nnnnusui.historizer.controller.Types._
-import com.github.nnnnusui.historizer.domain.content.Article
+import com.github.nnnnusui.historizer.domain.content.Content
 import com.github.nnnnusui.historizer.interop.slick.zio.UsesDatabase
 import zio.stream.{UStream, ZStream}
 import zio.{Has, Hub, UIO, URIO, ZIO, ZLayer}
@@ -21,8 +21,9 @@ object Service {
 //    def publishArticle()                // ID => article.update
 //
 //    // Content (id != parentId)
-//    def findContent()   // ID => content.findBy
-//    def addContent()    // Content => content.create => history.create
+    def findContent(args: QueryContentArgs): UIO[Option[Output.Content]]
+    def addContent(args: MutationAddContentArgs): UIO[Output.Content]
+//    def addedContent(args: SubscriptionAddedContent): UStream[Output.Content]
 //    def updateContent() // Identified[Content] => content.update => history.create
 //
 //    // Text(contentId: ID, value: String)
@@ -49,12 +50,19 @@ object Service {
   def addedArticle: Stream[Output.Article] =
     ZStream.accessStream(_.get.addedArticle)
 
+  def addContent(input: Input[MutationAddContentArgs]): IO[Output.Content] =
+    URIO.accessM(_.get.addContent(input.args))
+
   def make: ZLayer[Any, Nothing, Get] = ZLayer.fromEffect {
     for {
       repository <- UsesDatabase.setup(
-        new H2Database with repository.ContentRoot with repository.ContentArticle {}
+        new H2Database
+          with repository.ContentRoot
+          with repository.ContentArticle
+          with repository.ContentParagraph {}
       )
-      subscriber <- Hub.unbounded[Output.Article]
+      addedArticleHub <- Hub.unbounded[Output.Article]
+      addedContentHub <- Hub.unbounded[Output.Content]
     } yield new Service {
       import repository._
 
@@ -75,14 +83,33 @@ object Service {
       }.orDie
 
       override def addArticle(args: MutationAddArticleArgs) = {
-        val article = Article(args.title)
+        val article = args.toDomain
         for {
           id <- contentArticle.create(article)
         } yield (id, article).toOutput
-      }.tap(subscriber.publish).orDie
+      }.tap(addedArticleHub.publish).orDie
 
       override def addedArticle =
-        ZStream.unwrapManaged(subscriber.subscribe.map(ZStream.fromQueue(_)))
+        ZStream.unwrapManaged(addedArticleHub.subscribe.map(ZStream.fromQueue(_)))
+
+      override def findContent(args: QueryContentArgs) = {
+        val id = args.id.toInt
+        for {
+          mayBeContent <- contentParagraph.getBy(id)
+        } yield for {
+          content <- mayBeContent
+        } yield (id, content).toOutput
+      }.orDie
+
+      override def addContent(args: MutationAddContentArgs) = {
+        args.toDomain match {
+          case it: Content.Paragraph.type =>
+            for {
+              id <- contentParagraph.create(it)
+            } yield (id, it).toOutput
+        }
+      }.tap(addedContentHub.publish).orDie
+
     }
   }
 }

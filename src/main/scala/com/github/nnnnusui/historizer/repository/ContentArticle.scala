@@ -1,6 +1,6 @@
 package com.github.nnnnusui.historizer.repository
 
-import com.github.nnnnusui.historizer.domain.content.Article
+import com.github.nnnnusui.historizer.domain.Article
 import com.github.nnnnusui.historizer.interop.slick.zio.UsesDatabase
 
 trait ContentArticle { self: UsesDatabase with ContentRoot =>

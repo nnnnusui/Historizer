@@ -2,6 +2,7 @@ import React from "react";
 import { useQuery } from "@apollo/client";
 import { useParams } from "react-router-dom";
 import { GetArticleDocument } from "../graphql/generated";
+import { AddContentForm } from "./AddContentForm";
 
 export const ArticlePage: React.FC = () => {
   const { articleId: id } = useParams<{ articleId: string }>();
@@ -17,6 +18,7 @@ export const ArticlePage: React.FC = () => {
   return (
     <>
       <h1>{title}</h1>
+      <AddContentForm />
     </>
   );
 };

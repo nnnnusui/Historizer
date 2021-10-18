@@ -22,7 +22,8 @@ object Api extends GenericSchema[Service.Get] {
           Service.findArticle
         ),
         Mutation(
-          Service.addArticle
+          Service.addArticle,
+          Service.addContent
         ),
         Subscription(
           Service.addedArticle
@@ -34,7 +35,8 @@ object Api extends GenericSchema[Service.Get] {
         article: Input[QueryArticleArgs] => Service.IO[Option[Article]]
     )
     case class Mutation(
-        addArticle: Input[MutationAddArticleArgs] => Service.IO[Article]
+        addArticle: Input[MutationAddArticleArgs] => Service.IO[Article],
+        addContent: Input[MutationAddContentArgs] => Service.IO[Content]
     )
     case class Subscription(
         addedArticle: Service.Stream[Article]
