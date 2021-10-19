@@ -4,13 +4,9 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.model.headers.HttpCookie
 import akka.http.scaladsl.server.Directives._
 import caliban.interop.circe.AkkaHttpCirceAdapter
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
-import com.github.nnnnusui.historizer.controller.Api
-import com.typesafe.config.{Config, ConfigFactory}
-import com.typesafe.sslconfig.util.ConfigLoader
+import com.typesafe.config.ConfigFactory
 import zio.Runtime
 import zio.clock.Clock
 import zio.console.Console
@@ -18,6 +14,8 @@ import zio.internal.Platform
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
+
+import com.github.nnnnusui.historizer.controller.Api
 
 object App extends App with AkkaHttpCirceAdapter {
 
@@ -32,7 +30,6 @@ object App extends App with AkkaHttpCirceAdapter {
 
   val config     = ConfigFactory.load()
   val publishDir = config.getString("publishDir")
-  val port       = config.getInt("port")
   val route =
     path("api" / "graphql") {
       adapter.makeHttpService(interpreter)
@@ -41,9 +38,20 @@ object App extends App with AkkaHttpCirceAdapter {
     } ~ getFromDirectory(publishDir) ~
       getFromFile(s"$publishDir/index.html")
 
-  val server        = Http().newServerAt("localhost", port)
-  val bindingFuture = server.bind(route)
-  println(s"Server running at http://localhost:$port")
+  val bindingFuture = Http().newServerAt("127.0.0.1", 443).enableHttps(Https.context).bind(route)
+  println(s"Server running at https://localhost:443")
+
+  val redirectRoute = scheme("http") {
+    extract(_.request.uri) { uri =>
+      redirect(
+        uri.withScheme("https"),
+        StatusCodes.MovedPermanently
+      )
+    }
+  }
+  Http().newServerAt("127.0.0.1", 80).bind(redirectRoute)
+  println(s"Server running at http://localhost:80")
+
   println("Press RETURN to stop...")
   StdIn.readLine()
   bindingFuture
