@@ -22,3 +22,32 @@ subscription AddedText {
     value
   }
 }
+mutation AddPartialText($args: MutationAddPartialTextArgsInput!) {
+  addPartialText(args: $args) {
+    id
+    value
+  }
+}
+subscription UpdatedText($args: SubscriptionUpdatedTextArgsInput!) {
+  updatedText(args: $args) {
+    id
+    value
+  }
+}
+# mutation AddCursor($args: MutationAddCursorArgsInput!) {
+#   addCursor(args: $args) {
+#     id
+#     position {
+#       textId
+#       offset
+#     }
+#   }
+# }
+# mutation StartTextEditing($args: MutationAddCursorArgsInput!) {
+#   addText {
+#     id
+#   }
+#   addCursor(args: $args) {
+#     id
+#   }
+# }

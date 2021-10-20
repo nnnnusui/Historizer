@@ -25,5 +25,10 @@ trait Text { self: UsesDatabase =>
     def create(from: domain.Text): IO[Int] = run { implicit ec =>
       autoInc += Data(-1, from.value)
     }
+    def update(from: domain.Text.Identified): IO[Int] = run {implicit ec =>
+      val (_id, domain.Text(value)) = from
+      val id = _id.toInt
+      table.filter(_.id === id) update Data(id, value)
+    }
   }
 }
