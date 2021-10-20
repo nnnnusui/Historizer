@@ -7,13 +7,12 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import caliban.interop.circe.AkkaHttpCirceAdapter
 import com.typesafe.config.ConfigFactory
+import scala.concurrent.ExecutionContextExecutor
+import scala.io.StdIn
 import zio.Runtime
 import zio.clock.Clock
 import zio.console.Console
 import zio.internal.Platform
-
-import scala.concurrent.ExecutionContextExecutor
-import scala.io.StdIn
 
 import com.github.nnnnusui.historizer.controller.Api
 
@@ -23,7 +22,7 @@ object App extends App with AkkaHttpCirceAdapter {
 
   implicit val executionContext: ExecutionContextExecutor = system.executionContext
 
-  implicit val runtime: Runtime[Service.Get with Console with Clock] =
+  implicit val runtime =
     Runtime.unsafeFromLayer(Service.make ++ Console.live ++ Clock.live, Platform.default)
 
   val interpreter = runtime.unsafeRun(Api.api.interpreter)
