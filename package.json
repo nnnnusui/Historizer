@@ -2,7 +2,7 @@
   "name": "historizer-frontend",
   "source": "src/main/parcel/index.pug",
   "scripts": {
-    "codegen": "graphql-codegen --config src/main/graphql/codegen.yml",
+    "codegen": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 graphql-codegen --config src/main/graphql/codegen.yml",
     "start": "parcel",
     "watch": "lock parcel watch",
     "build": "parcel build",
@@ -17,6 +17,7 @@
     "@graphql-codegen/typescript-react-apollo": "3.1.4",
     "@parcel/transformer-pug": "^2.0.0-rc.0",
     "@parcel/transformer-stylus": "^2.0.0-rc.0",
+    "cross-env": "^7.0.3",
     "npm-run-lock": "^0.9.5",
     "parcel": "^2.0.0-rc.0"
   },
