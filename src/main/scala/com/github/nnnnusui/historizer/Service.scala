@@ -1,11 +1,12 @@
 package com.github.nnnnusui.historizer
 
-import zio.{Has, Hub, UIO, URIO, ZIO, ZLayer}
+import zio.{Has, Hub, Ref, UIO, URIO, ZIO, ZLayer}
 import zio.stream.{UStream, ZStream}
 
 import com.github.nnnnusui.historizer.controller.Types._
 import com.github.nnnnusui.historizer.domain.Text
 import com.github.nnnnusui.historizer.interop.slick.zio.UsesDatabase
+import com.github.nnnnusui.historizer.usecase.CaretService
 
 object Service {
   trait Service {
@@ -35,8 +36,6 @@ object Service {
     def addPartialText(args: MutationAddPartialTextArgs): UIO[Output.Text]
     def updatedText(args: SubscriptionUpdatedTextArgs): UStream[Output.Text]
 //    def startSession: URIO[Session.Get, Session]
-//    def addCursor(args: MutationAddCursorArgs): UIO[Output.Cursor]
-//    def moveCursor: URIO[Session.Get, Output.Cursor]
 //    def addPartialText()    // PartialText => text.update => history.create
 //    def removePartialText() // PartialText => text.update => history.create
 //
@@ -60,63 +59,63 @@ object Service {
     URIO.accessM(_.get.addPartialText(input.args))
   def updatedText(input: Input[SubscriptionUpdatedTextArgs]): Stream[Output.Text] =
     ZStream.accessStream(_.get.updatedText(input.args))
+
 //  def startSession: URIO[Get with Session.Get, Session] = URIO.accessM(_.get.startSession)
-//  def addCursor(input: Input[MutationAddCursorArgs]): IO[Output.Cursor] = URIO.accessM(_.get.addCursor(input.args))
-//  def moveCursor: URIO[Get with Session.Get, Output.Cursor] = URIO.accessM(_.get.moveCursor)
 
-  def make: ZLayer[Any, Nothing, Get] = ZLayer.fromEffect {
-    for {
-      repository <- UsesDatabase.setup(
-        new H2Database with repository.Text {}
-      )
-      addedTextHub   <- Hub.unbounded[Output.Text]
-      updatedTextHub <- Hub.unbounded[Output.Text]
-//      addedCursorHub <- Hub.unbounded[Output.Cursor]
-    } yield new Service {
-      import repository._
-
-      override def findTexts: UIO[Seq[Output.Text]] =
-        text.getAll.map(_.map(_.toOutput)).orDie
-      override def findText(args: QueryTextArgs): UIO[Option[Output.Text]] = {
-        val QueryTextArgs(id) = args
-        text.getBy(id.toInt).map(_.map(domain => (id, domain).toOutput))
-      }.orDie
-      override def addText: UIO[Output.Text] = {
-        val domain = Text("")
-        for {
-          id <- text.create(domain)
-        } yield (id.toString, domain).toOutput
-      }.tap(addedTextHub.publish).orDie
-      override def addedText: UStream[Output.Text] =
-        ZStream.unwrapManaged(addedTextHub.subscribe.map(ZStream.fromQueue(_)))
-      override def addPartialText(args: MutationAddPartialTextArgs): UIO[Output.Text] = {
-        val MutationAddPartialTextArgs(textId, offset, value) = args
-        for {
-          mayBeText <- text.getBy(textId.toInt)
-        } yield {
-          val domain = (for {
-            text <- mayBeText
-          } yield {
-            val after = text.value.patch(offset, value, 0)
-            text.copy(value = after)
-          }).get
-          val identified = (textId, domain)
-          text.update(identified).map(_ => identified.toOutput)
-        }
-      }.flatten.tap(updatedTextHub.publish).orDie
-      override def updatedText(args: SubscriptionUpdatedTextArgs): UStream[Output.Text] =
-        ZStream.unwrapManaged(
-          updatedTextHub.subscribe.map(_.filterOutput(_.id == args.id)).map(ZStream.fromQueue(_))
+  def make: ZLayer[Any, Nothing, Has[Service] with CaretService.Get] =
+    CaretService.make >+> ZLayer.fromEffect {
+      for {
+        caretService <- ZIO.access[CaretService.Get](_.get)
+        repository <- UsesDatabase.setup(
+          new H2Database with repository.Text {}
         )
-      //      override def addCursor(args: MutationAddCursorArgs): UIO[Output.Cursor] =
-//        addedCursorHub.size.map(size => {
-//          val cursor = Output.Cursor(size.toString, args.position)
-//          addedCursorHub.publish(cursor)
-//          cursor
-//        })
-//      override def moveCursor: URIO[Session.Get, Output.Cursor] = for {
-//        session <- URIO.accessM[Session.Get](_.get.get)
-//      } yield Output.Cursor(1)
+        addedTextHub   <- Hub.unbounded[Output.Text]
+        updatedTextHub <- Hub.unbounded[Output.Text]
+      } yield new Service {
+        import repository._
+
+        override def findTexts: UIO[Seq[Output.Text]] = {
+          for {
+            texts <- text.getAll
+            seq <- ZIO.foreach(texts)(it =>
+              caretService.findCarets(QueryCaretsArgs(it._1)).map((it, _))
+            )
+          } yield for {
+            (identified, carets) <- seq
+          } yield identified.toOutput(carets)
+        }.orDie
+        override def findText(args: QueryTextArgs): UIO[Option[Output.Text]] = {
+          val QueryTextArgs(id) = args
+          text.getBy(id.toInt).map(_.map(domain => (id, domain).toOutput()))
+        }.orDie
+
+        override def addText: UIO[Output.Text] = {
+          val domain = Text("")
+          for {
+            id <- text.create(domain)
+          } yield (id.toString, domain).toOutput()
+        }.tap(addedTextHub.publish).orDie
+        override def addedText: UStream[Output.Text] =
+          ZStream.unwrapManaged(addedTextHub.subscribe.map(ZStream.fromQueue(_)))
+        override def addPartialText(args: MutationAddPartialTextArgs): UIO[Output.Text] = {
+          val MutationAddPartialTextArgs(textId, offset, value) = args
+          for {
+            mayBeText <- text.getBy(textId.toInt)
+          } yield {
+            val domain = (for {
+              text <- mayBeText
+            } yield {
+              val after = text.value.patch(offset, value, 0)
+              text.copy(value = after)
+            }).get
+            val identified = (textId, domain)
+            text.update(identified).map(_ => identified.toOutput())
+          }
+        }.flatten.tap(updatedTextHub.publish).orDie
+        override def updatedText(args: SubscriptionUpdatedTextArgs): UStream[Output.Text] =
+          ZStream.unwrapManaged(
+            updatedTextHub.subscribe.map(_.filterOutput(_.id == args.id)).map(ZStream.fromQueue(_))
+          )
 
 //      override def startSession: URIO[Session.Get, Session] = {
 //        val session = Session("it")
@@ -124,7 +123,6 @@ object Service {
 //          _ <- URIO.accessM[Session.Get](_.get.set(Some(session)))
 //        } yield session
 //      }
-
+      }
     }
-  }
 }
