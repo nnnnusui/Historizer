@@ -24,7 +24,7 @@ export const TextList: React.FC = () => {
   return (
     <>
       {texts.map(({ id }) => (
-        <Text id={id} key={id} />
+        <Text key={id} id={id} />
       ))}
     </>
   );
