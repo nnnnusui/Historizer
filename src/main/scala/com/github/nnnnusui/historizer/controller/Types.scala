@@ -8,12 +8,12 @@ object Types {
   type TextId  = ID
   type CaretId = ID
   object Output {
-    case class Caret(id: CaretId, textId: TextId, offset: Int)
+    case class Caret(id: CaretId, offset: Int)
     case class Text(id: TextId, value: String, carets: Seq[Caret])
   }
 
   case class QueryTextArgs(id: TextId)
-//  case class MutationAddTextArgs()
+  case class MutationAddTextArgs(value: String)
   case class MutationAddPartialTextArgs(textId: TextId, offset: Int, value: String)
 //  case class MutationRemovePartialTextArgs(textId: TextId, offset: Int, length: Int)
   case class SubscriptionUpdatedTextArgs(id: TextId)

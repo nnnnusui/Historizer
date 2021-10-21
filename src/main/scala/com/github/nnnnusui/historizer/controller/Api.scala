@@ -37,7 +37,7 @@ object Api {
         text: Input[QueryTextArgs] => Service.IO[Option[Text]]
     )
     case class Mutation(
-        addText: Service.IO[Text],
+        addText: Input[MutationAddTextArgs] => Service.IO[Text],
         addPartialText: Input[MutationAddPartialTextArgs] => Service.IO[Text]
     )
     case class Subscription(

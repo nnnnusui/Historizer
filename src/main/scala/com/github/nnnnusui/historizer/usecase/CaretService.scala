@@ -36,55 +36,62 @@ object CaretService {
   def deletedCaret(input: Input[SubscriptionDeletedCaretArgs]): Stream[CaretId] =
     ZStream.accessStream(_.get.deletedCaret(input.args))
 
+  case class Caret(textId: TextId, output: Output.Caret)
   def make: ZLayer[Any, Nothing, Has[Service]] = ZLayer.fromEffect {
     for {
-      caret           <- Ref.make(Seq.empty[Output.Caret])
-      addedCaretHub   <- Hub.unbounded[Output.Caret]
-      movedCaretHub   <- Hub.unbounded[Output.Caret]
+      caret           <- Ref.make(Seq.empty[Caret])
+      addedCaretHub   <- Hub.unbounded[Caret]
+      movedCaretHub   <- Hub.unbounded[Caret]
       deletedCaretHub <- Hub.unbounded[CaretId]
     } yield new Service {
 
       override def findCarets(args: QueryCaretsArgs): UIO[Seq[Output.Caret]] =
-        caret.get.map(_.filter(_.textId == args.textId))
+        caret.get.map(_.filter(_.textId == args.textId).map(_.output))
       override def findCaret(args: QueryCaretArgs): UIO[Option[Output.Caret]] =
-        caret.get.map(_.find(_.id == args.id))
+        caret.get.map(_.find(_.output.id == args.id).map(_.output))
 
       override def addCaret(args: MutationAddCaretArgs): UIO[Output.Caret] =
         caret.get
           .map(it => {
             val size   = it.size
-            val output = Output.Caret(size.toString, args.textId, args.offset)
-            caret.update(_ :+ output)
+            val output = Output.Caret(size.toString, args.offset)
+//            val domain = Caret(args.textId, output)
+//            caret.update(_ :+ domain)
+//            addedCaretHub.publish(domain)
             output
           })
-          .tap(addedCaretHub.publish)
       override def addedCaret(args: SubscriptionAddedCaretArgs): UStream[Output.Caret] =
         ZStream.unwrapManaged(
           addedCaretHub.subscribe
             .map(_.filterOutput(_.textId == args.textId))
+            .map(_.map(_.output))
             .map(ZStream.fromQueue(_))
         )
 
       override def moveCaret(args: MutationMoveCaretArgs): UIO[Output.Caret] = {
         for {
-          it <- caret.get.map(_.find(_.id == args.id))
+          it <- caret.get.map(_.find(_.output.id == args.id))
+          Caret(textId, _output) = it.get
         } yield {
-          val output = it.get.copy(offset = args.offset)
-          caret.update(_.map(it => if (it.id == args.id) output else it))
+          val output = _output.copy(offset = args.offset)
+          val domain = Caret(textId, output)
+          caret.update(_.map(it => if (it.output.id == args.id) domain else it))
+          movedCaretHub.publish(domain)
           output
         }
-      }.tap(movedCaretHub.publish)
+      }
       override def movedCaret(args: SubscriptionMovedCaretArgs): UStream[Output.Caret] =
         ZStream.unwrapManaged(
           movedCaretHub.subscribe
-            .map(_.filterOutput(_.id == args.id))
+            .map(_.filterOutput(_.output.id == args.id))
+            .map(_.map(_.output))
             .map(ZStream.fromQueue(_))
         )
 
       override def deleteCaret(args: MutationDeleteCaretArgs): UIO[Boolean] =
         caret
           .modify(it => {
-            if (it.exists(_.id == args.id)) (true, it.filterNot(_.id == args.id))
+            if (it.exists(_.output.id == args.id)) (true, it.filterNot(_.output.id == args.id))
             else (false, it)
           })
           .tap(deleted => UIO.when(deleted)(deletedCaretHub.publish(args.id)))

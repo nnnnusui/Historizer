@@ -31,7 +31,7 @@ object Service {
 //    // Text(contentId: ID, value: String)
     def findTexts: UIO[Seq[Output.Text]]
     def findText(args: QueryTextArgs): UIO[Option[Output.Text]]
-    def addText: UIO[Output.Text]
+    def addText(args: MutationAddTextArgs): UIO[Output.Text]
     def addedText: UStream[Output.Text]
     def addPartialText(args: MutationAddPartialTextArgs): UIO[Output.Text]
     def updatedText(args: SubscriptionUpdatedTextArgs): UStream[Output.Text]
@@ -53,7 +53,8 @@ object Service {
   def findTexts: IO[Seq[Output.Text]] = URIO.accessM(_.get.findTexts)
   def findText(input: Input[QueryTextArgs]): IO[Option[Output.Text]] =
     URIO.accessM(_.get.findText(input.args))
-  def addText: IO[Output.Text]       = URIO.accessM(_.get.addText)
+  def addText(input: Input[MutationAddTextArgs]): IO[Output.Text] =
+    URIO.accessM(_.get.addText(input.args))
   def addedText: Stream[Output.Text] = ZStream.accessStream(_.get.addedText)
   def addPartialText(input: Input[MutationAddPartialTextArgs]): IO[Output.Text] =
     URIO.accessM(_.get.addPartialText(input.args))
@@ -86,11 +87,16 @@ object Service {
         }.orDie
         override def findText(args: QueryTextArgs): UIO[Option[Output.Text]] = {
           val QueryTextArgs(id) = args
-          text.getBy(id.toInt).map(_.map(domain => (id, domain).toOutput()))
+          for {
+            mayBeText <- text.getBy(id.toInt)
+            carets    <- caretService.findCarets(QueryCaretsArgs(id))
+          } yield for {
+            text <- mayBeText
+          } yield (id, text).toOutput(carets)
         }.orDie
 
-        override def addText: UIO[Output.Text] = {
-          val domain = Text("")
+        override def addText(args: MutationAddTextArgs): UIO[Output.Text] = {
+          val domain = Text(args.value)
           for {
             id <- text.create(domain)
           } yield (id.toString, domain).toOutput()
