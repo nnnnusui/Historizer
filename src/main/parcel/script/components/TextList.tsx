@@ -23,8 +23,8 @@ export const TextList: React.FC = () => {
   const { texts } = data;
   return (
     <>
-      {texts.map(({ id }) => (
-        <Text key={id} id={id} />
+      {texts.map((schema) => (
+        <Text key={schema.id} schema={{ kind: "full", value: schema }} />
       ))}
     </>
   );

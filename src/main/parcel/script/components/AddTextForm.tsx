@@ -9,7 +9,7 @@ export const AddTextForm: React.FC = () => {
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    addText({ variables: {} });
+    addText({ variables: { args: { value: "" } } });
   };
   return (
     <form onSubmit={onSubmit}>

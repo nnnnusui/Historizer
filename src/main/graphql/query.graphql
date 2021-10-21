@@ -1,25 +1,32 @@
+fragment caretFragment on Caret {
+  id
+  offset
+}
+fragment textFragment on Text {
+  id
+  value
+  carets {
+    ...caretFragment
+  }
+}
 query GetTexts {
   texts {
-    id
-    value
+    ...textFragment
   }
 }
 query GetText($args: QueryTextArgsInput!) {
   text(args: $args) {
-    id
-    value
+    ...textFragment
   }
 }
-mutation AddText {
-  addText {
-    id
-    value
+mutation AddText($args: MutationAddTextArgsInput!) {
+  addText(args: $args) {
+    ...textFragment
   }
 }
 subscription AddedText {
   addedText {
-    id
-    value
+    ...textFragment
   }
 }
 mutation AddPartialText($args: MutationAddPartialTextArgsInput!) {
@@ -34,20 +41,19 @@ subscription UpdatedText($args: SubscriptionUpdatedTextArgsInput!) {
     value
   }
 }
-# mutation AddCursor($args: MutationAddCursorArgsInput!) {
-#   addCursor(args: $args) {
-#     id
-#     position {
-#       textId
-#       offset
-#     }
-#   }
-# }
-# mutation StartTextEditing($args: MutationAddCursorArgsInput!) {
-#   addText {
-#     id
-#   }
-#   addCursor(args: $args) {
-#     id
-#   }
-# }
+
+query GetCaret($args: QueryCaretArgsInput!) {
+  caret(args: $args) {
+    ...caretFragment
+  }
+}
+mutation AddCaret($args: MutationAddCaretArgsInput!) {
+  addCaret(args: $args) {
+    ...caretFragment
+  }
+}
+subscription MovedCaret($args: SubscriptionMovedCaretArgsInput!) {
+  movedCaret(args: $args) {
+    ...caretFragment
+  }
+}
